@@ -18,3 +18,19 @@ variable "tags" {
   default = null
   
 }
+
+variable "function_name" {
+  description = "The name of the Lambda function."
+  type        = string
+}
+
+variable "handler" {
+  description = "The handler for the Lambda function."
+  type        = string
+}
+
+variable "policy_document" {
+  description = "The IAM policy document for the Lambda execution role."
+  type        =  any
+  
+}

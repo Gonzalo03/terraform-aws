@@ -26,26 +26,26 @@ data "aws_iam_policy_document" "lambda_execution" {
 }
 
 resource "aws_iam_role" "example" {
-  name               = "lambda_execution_role"
+  name               = "${var.function_name}_execution_role"
   assume_role_policy = data.aws_iam_policy_document.assume_role.json
 }
 
 resource "aws_iam_role_policy" "lambda_execution" {
   role   = aws_iam_role.example.id
-  policy = data.aws_iam_policy_document.lambda_execution.json
+  policy = jsonencode(merge(jsondecode(var.policy_document.json), jsondecode(data.aws_iam_policy_document.lambda_execution.json)))
 }
 
 data "archive_file" "example" {
   type        = "zip"
-  source_dir = var.code_language == "ts" ? "${path.module}/app/dist" : "${path.module}/app/src"
+  source_dir  = var.code_language == "ts" ? "${path.module}/app/dist" : "${path.module}/app/src"
   output_path = "${path.module}/.terraform/tmp/example.zip"
 }
 
 resource "aws_lambda_function" "example" {
   filename         = data.archive_file.example.output_path
-  function_name    = "example_lambda_function"
+  function_name    = var.function_name
   role             = aws_iam_role.example.arn
-  handler          = "index.handler"
+  handler          = var.handler
   source_code_hash = data.archive_file.example.output_base64sha256
 
   runtime = "nodejs20.x"
